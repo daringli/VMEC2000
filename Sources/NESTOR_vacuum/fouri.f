@@ -24,6 +24,8 @@ C-----------------------------------------------
       INTEGER :: i, j, k, m, mn, mn0, n
       REAL(dp), ALLOCATABLE, DIMENSION(:) :: source
       REAL(dp) :: ton, toff, tfourion, tfourioff
+      REAL(dp), DIMENSION(mnpd,mnpd,ndim**2) :: amatrix2
+
 !-----------------------------------------------
 !
 !     AMATRIX(,1) = A(Sin)(Sin');  AMATRIX(,2) = A(Sin)(Cos');
@@ -103,9 +105,10 @@ C-----------------------------------------------
 
       IF (vlactive) THEN
          CALL second0(ton)
-         print*,"WARNING: MPI_IN_PLACE in fouri.f"  ! MJL
-         CALL MPI_Allreduce(MPI_IN_PLACE, amatrix, SIZE(amatrix),
+         !print*,"WARNING: MPI_IN_PLACE in fouri.f"  ! MJL
+         CALL MPI_Allreduce(amatrix, amatrix2, SIZE(amatrix),
      &                      MPI_REAL8, MPI_SUM, VAC_COMM, MPI_ERR)
+         amatrix = amatrix2
          CALL second0(toff)
          allreduce_time = allreduce_time + (toff - ton)
       END IF

@@ -15,6 +15,9 @@ C-----------------------------------------------
       REAL(dp), ALLOCATABLE :: grpmn(:), green(:), gstore(:)
       REAL(dp), ALLOCATABLE :: greenp(:,:)
       REAL(dp) :: ton, toff, tonscal
+      REAL(dp), DIMENSION(nuv) :: gstore2
+      REAL(dp), DIMENSION(mnpd2) :: bvec2
+      
 C-----------------------------------------------
       CALL second0(tonscal)
 
@@ -95,9 +98,10 @@ C-----------------------------------------------
 
          CALL second0(ton)
          IF (vlactive) THEN
-            print*,"WARNING: MPI_IN_PLACE in scalpot.f 1"  ! MJL
-            CALL MPI_Allreduce(MPI_IN_PLACE, gstore, SIZE(gstore),
+            !print*,"WARNING: MPI_IN_PLACE in scalpot.f 1"  ! MJL
+            CALL MPI_Allreduce(gstore, gstore2, SIZE(gstore),
      &                         MPI_REAL8, MPI_SUM, VAC_COMM, MPI_ERR)
+            gstore = gstore2
          END IF
          CALL second0(toff)
          allreduce_time = allreduce_time + (toff - ton)
@@ -121,9 +125,11 @@ C-----------------------------------------------
 !
       CALL second0(ton)
       IF (vlactive) THEN
-            print*,"WARNING: MPI_IN_PLACE in scalpot.f 2"  ! MJL
-         CALL MPI_Allreduce(MPI_IN_PLACE, bvec, SIZE(bvec), MPI_REAL8,
+!        MPI_IN_PLACE removed since a warning was triggered
+!        by free boundary VMEC. SB 2023-04-19
+         CALL MPI_Allreduce(bvec, bvec2, SIZE(bvec), MPI_REAL8,
      &                      MPI_SUM, VAC_COMM, MPI_ERR)
+         bvec = bvec2
       END IF
 
       CALL second0(toff)

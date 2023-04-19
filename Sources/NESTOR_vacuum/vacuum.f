@@ -28,6 +28,7 @@ C-----------------------------------------------
       REAL(dp):: dn2, dm2, cosmn, sinmn, huv, hvv,
      &           det, bsubuvac, fac, ton, toff
       REAL(dp) :: tmp1(2), tmp2(2)
+      REAL(dp), DIMENSION(nuv3) :: bsqvac2 ! MJL 2022-01-13
 C-----------------------------------------------
 !
 !     THIS ROUTINE COMPUTES .5 * B**2 ON THE VACUUM / PLASMA SURFACE
@@ -234,10 +235,13 @@ C-----------------------------------------------
       CALL second0(ton)
 
       IF (vlactive) THEN
-         print *,"WARNING: MPI_IN_PLACE in vacuum.f"  ! MJL
-         CALL MPI_Allgatherv(MPI_IN_PLACE, numjs_vac, MPI_REAL8, bsqvac,
-     &                       counts_vac, disps_vac, MPI_REAL8, VAC_COMM,
+!        MPI_IN_PLACE removed since a warning was triggered
+!        by free boundary VMEC. SB 2023-04-19
+         CALL MPI_Allgatherv(bsqvac(nuv3min), numjs_vac, 
+     &                       MPI_REAL8, bsqvac2, counts_vac,
+     &                       disps_vac, MPI_REAL8, VAC_COMM,
      &                       MPI_ERR)
+         bsqvac = bsqvac2
       END IF
 
       CALL second0(toff)
